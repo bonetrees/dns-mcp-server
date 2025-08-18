@@ -1,0 +1,236 @@
+"""
+Async bulk DNS operations
+High-performance concurrent DNS queries with rate limiting
+"""
+
+import asyncio
+import time
+from typing import Dict, List, Optional
+
+from .server import mcp
+from .resolvers import create_resolver  
+from .formatters import format_bulk_response, format_error_response
+
+
+@mcp.tool()
+async def dns_bulk_query(
+    domains: List[str],
+    record_type: str = "A",
+    nameserver: Optional[str] = None,
+    resolver_type: str = "system",
+    timeout: int = 10,
+    max_workers: int = 10
+) -> Dict:
+    """
+    Perform concurrent bulk DNS queries for multiple domains
+    
+    Args:
+        domains: List of domains to query
+        record_type: DNS record type for all queries
+        nameserver: Custom nameserver IP (optional)
+        resolver_type: Predefined resolver type (system, public, google, cloudflare, quad9, opendns)
+        timeout: Query timeout in seconds
+        max_workers: Maximum concurrent queries (default: 10)
+        
+    Returns:
+        Dictionary with bulk query results
+    """
+    if not domains:
+        return {
+            "bulk_query": True,
+            "record_type": record_type.upper(),
+            "domain_count": 0,
+            "successful_queries": 0,
+            "failed_queries": 0,
+            "total_query_time_seconds": 0.0,
+            "average_query_time_seconds": 0.0,
+            "results": []
+        }
+    
+    # Limit concurrent workers to prevent overwhelming resolvers
+    actual_workers = min(max_workers, len(domains))
+    
+    resolver = create_resolver(
+        nameserver=nameserver,
+        resolver_type=resolver_type,
+        timeout=float(timeout)
+    )
+    
+    start_time = time.time()
+    
+    async def query_single_domain(domain: str) -> Dict:
+        """Query single domain with comprehensive error handling"""
+        domain_start = time.time()
+        
+        try:
+            records = await resolver.query(domain, record_type.upper())
+            query_time = time.time() - domain_start
+            
+            return {
+                "domain": domain,
+                "record_type": record_type.upper(),
+                "records": records,
+                "record_count": len(records),
+                "query_time_seconds": round(query_time, 3)
+            }
+            
+        except Exception as e:
+            query_time = time.time() - domain_start
+            
+            return {
+                "domain": domain,
+                "record_type": record_type.upper(),
+                "query_time_seconds": round(query_time, 3),
+                "error": format_error_response(
+                    e,
+                    context={
+                        "domain": domain,
+                        "record_type": record_type,
+                        "resolver": resolver.resolver_id
+                    }
+                )
+            }
+    
+    # Execute concurrent queries with semaphore for rate limiting
+    semaphore = asyncio.Semaphore(actual_workers)
+    
+    async def rate_limited_query(domain: str):
+        """Execute query with semaphore rate limiting"""
+        async with semaphore:
+            return await query_single_domain(domain)
+    
+    # Create and execute all tasks
+    tasks = [rate_limited_query(domain) for domain in domains]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Handle any task-level exceptions
+    processed_results = []
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            # Task-level failure
+            processed_results.append({
+                "domain": domains[i],
+                "record_type": record_type.upper(),
+                "query_time_seconds": 0.0,
+                "error": format_error_response(
+                    result,
+                    context={
+                        "domain": domains[i],
+                        "record_type": record_type,
+                        "operation": "bulk_query"
+                    }
+                )
+            })
+        else:
+            processed_results.append(result)
+    
+    total_time = time.time() - start_time
+    
+    resolver_info = {
+        "resolver_id": resolver.resolver_id,
+        "resolver_type": resolver_type,
+        "nameserver": nameserver
+    }
+    
+    return format_bulk_response(
+        domains=domains,
+        record_type=record_type,
+        results=processed_results,
+        total_time=total_time,
+        resolver_info=resolver_info
+    )
+
+
+@mcp.tool()
+async def dns_bulk_reverse_lookup(
+    ips: List[str],
+    nameserver: Optional[str] = None,
+    resolver_type: str = "system",
+    timeout: int = 10,
+    max_workers: int = 10
+) -> Dict:
+    """
+    Perform concurrent bulk reverse DNS lookups for multiple IP addresses
+    
+    Args:
+        ips: List of IP addresses to reverse lookup
+        nameserver: Custom nameserver IP (optional)
+        resolver_type: Predefined resolver type (system, public, google, cloudflare, quad9, opendns)
+        timeout: Query timeout in seconds
+        max_workers: Maximum concurrent queries (default: 10)
+        
+    Returns:
+        Dictionary with bulk reverse lookup results
+    """
+    if not ips:
+        return {
+            "bulk_reverse_lookup": True,
+            "ip_count": 0,
+            "successful_queries": 0,
+            "failed_queries": 0,
+            "total_query_time_seconds": 0.0,
+            "average_query_time_seconds": 0.0,
+            "results": []
+        }
+    
+    # Limit concurrent workers
+    actual_workers = min(max_workers, len(ips))
+    
+    start_time = time.time()
+    
+    async def reverse_lookup_single_ip(ip: str) -> Dict:
+        """Reverse lookup single IP with error handling"""
+        # Use the existing dns_reverse_lookup function
+        result = await dns_reverse_lookup(
+            ip=ip,
+            nameserver=nameserver,
+            resolver_type=resolver_type,
+            timeout=timeout
+        )
+        return result
+    
+    # Execute concurrent reverse lookups with semaphore
+    semaphore = asyncio.Semaphore(actual_workers)
+    
+    async def rate_limited_reverse_lookup(ip: str):
+        """Execute reverse lookup with semaphore rate limiting"""
+        async with semaphore:
+            return await reverse_lookup_single_ip(ip)
+    
+    # Create and execute all tasks  
+    tasks = [rate_limited_reverse_lookup(ip) for ip in ips]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Handle task-level exceptions
+    processed_results = []
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            processed_results.append({
+                "ip": ips[i],
+                "nameserver": nameserver or resolver_type,
+                "query_time_seconds": 0.0,
+                "error": format_error_response(
+                    result,
+                    context={
+                        "ip": ips[i],
+                        "operation": "bulk_reverse_lookup"
+                    }
+                )
+            })
+        else:
+            processed_results.append(result)
+    
+    total_time = time.time() - start_time
+    successful_queries = sum(1 for r in processed_results if "error" not in r)
+    failed_queries = len(processed_results) - successful_queries
+    
+    return {
+        "bulk_reverse_lookup": True,
+        "nameserver": nameserver or resolver_type,
+        "ip_count": len(ips),
+        "successful_queries": successful_queries,
+        "failed_queries": failed_queries,
+        "total_query_time_seconds": round(total_time, 3),
+        "average_query_time_seconds": round(total_time / len(ips), 3) if ips else 0,
+        "results": processed_results
+    }
