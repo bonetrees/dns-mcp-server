@@ -4,11 +4,11 @@ Handles formatting of various DNS record types and error responses
 """
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 
 def format_error_response(
-    error: Exception, context: Optional[dict[str, Any]] = None
+    error: Exception, context: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """
     Format error responses with OSINT context and insights
@@ -142,7 +142,7 @@ def format_dns_response(
     records: list,
     query_time: float,
     resolver_info: dict[str, Any],
-    error: Optional[Exception] = None,
+    error: Exception | None = None,
 ) -> dict[str, Any]:
     """
     Format DNS query response with comprehensive metadata

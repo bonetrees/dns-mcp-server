@@ -155,7 +155,7 @@ def validate_resolver_type(resolver_type: str) -> str:
     if resolver_type not in RESOLVER_CONFIGS and resolver_type != "system":
         raise ValueError(
             f"Unsupported resolver type: {resolver_type}. "
-            f"Supported types: {', '.join(list(RESOLVER_CONFIGS.keys()) + ['system'])}"
+            f"Supported types: {', '.join([*RESOLVER_CONFIGS, 'system'])}"
         )
     return resolver_type
 

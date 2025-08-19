@@ -41,7 +41,7 @@ Note:
     30 requests per second per resolver.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 import aiodns
 
@@ -56,7 +56,7 @@ class AsyncDNSResolver:
 
     def __init__(
         self,
-        nameservers: Optional[list[str]] = None,
+        nameservers: list[str] | None = None,
         resolver_type: str = "system",
         timeout: float = 10.0,
     ):
@@ -183,7 +183,7 @@ class AsyncDNSResolver:
 
 
 def create_resolver(
-    nameserver: Optional[str] = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: float = 10.0,
 ) -> AsyncDNSResolver:

@@ -249,7 +249,7 @@ class TestConcurrencyStress:
         assert len(results) == 4
         for result in results:
             # Should be dict (success) or exception
-            assert isinstance(result, (dict, Exception))
+            assert isinstance(result, dict | Exception)
 
 
 class TestResourceExhaustion:

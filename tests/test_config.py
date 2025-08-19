@@ -96,7 +96,7 @@ class TestValidationFunctions:
 
     def test_validate_resolver_type_valid(self):
         """Test validation with valid resolver types"""
-        for resolver_type in RESOLVER_CONFIGS.keys():
+        for resolver_type in RESOLVER_CONFIGS:
             assert validate_resolver_type(resolver_type) == resolver_type
 
         # Test system resolver
@@ -147,7 +147,7 @@ class TestResolverConfigurations:
 
     def test_resolver_configs_structure(self):
         """Test resolver configurations structure"""
-        for resolver_name, nameservers in RESOLVER_CONFIGS.items():
+        for _resolver_name, nameservers in RESOLVER_CONFIGS.items():
             assert isinstance(nameservers, list)
             assert len(nameservers) > 0
 
@@ -273,7 +273,7 @@ class TestConfigurationIntegration:
     def test_config_consistency(self):
         """Test that configuration values are consistent across modules"""
         # All resolvers used in propagation should exist in main config
-        for resolver_name in DEFAULT_PROPAGATION_RESOLVERS.keys():
+        for resolver_name in DEFAULT_PROPAGATION_RESOLVERS:
             if resolver_name not in [
                 "level3",
                 "verisign",

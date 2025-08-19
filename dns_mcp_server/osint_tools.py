@@ -512,7 +512,7 @@ async def dns_response_analysis(
         iteration_start = time.time()
 
         try:
-            records = await resolver.query(domain, record_type.upper())
+            _ = await resolver.query(domain, record_type.upper())
             response_time = time.time() - iteration_start
             response_times.append(response_time)
             successful_queries += 1
