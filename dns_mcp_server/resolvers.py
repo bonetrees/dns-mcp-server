@@ -52,16 +52,16 @@ class AsyncDNSResolver:
     """
     Async DNS resolver with rate limiting and multiple resolver support
     """
-    
+
     def __init__(
-        self, 
+        self,
         nameservers: Optional[List[str]] = None,
         resolver_type: str = "system",
-        timeout: float = 10.0
+        timeout: float = 10.0,
     ):
         """
         Initialize async DNS resolver
-        
+
         Args:
             nameservers: Custom nameserver IPs (overrides resolver_type)
             resolver_type: Predefined resolver type or "system"
@@ -69,10 +69,10 @@ class AsyncDNSResolver:
         """
         self.resolver_type = resolver_type
         self.timeout = timeout
-        
+
         # Create aiodns resolver
         self.resolver = aiodns.DNSResolver(timeout=timeout)
-        
+
         # Configure nameservers
         if nameservers:
             self.resolver.nameservers = nameservers
@@ -83,72 +83,75 @@ class AsyncDNSResolver:
         else:
             # Use system default resolvers
             self.resolver_id = "system"
-    
+
     async def query(self, domain: str, record_type: str) -> List[str]:
         """
         Perform rate-limited async DNS query
-        
+
         Args:
             domain: Domain to query
             record_type: DNS record type (A, AAAA, MX, etc.)
-            
+
         Returns:
             List of formatted DNS records
-            
+
         Raises:
             Various aiodns exceptions for DNS errors
         """
         # Apply rate limiting
         await dns_rate_limiter.acquire(self.resolver_id)
-        
+
         # Map record types to aiodns query types
         query_type_map = {
-            'A': 'A',
-            'AAAA': 'AAAA', 
-            'MX': 'MX',
-            'TXT': 'TXT',
-            'NS': 'NS',
-            'SOA': 'SOA',
-            'CNAME': 'CNAME',
-            'CAA': 'CAA',
-            'SRV': 'SRV',
-            'PTR': 'PTR'
+            "A": "A",
+            "AAAA": "AAAA",
+            "MX": "MX",
+            "TXT": "TXT",
+            "NS": "NS",
+            "SOA": "SOA",
+            "CNAME": "CNAME",
+            "CAA": "CAA",
+            "SRV": "SRV",
+            "PTR": "PTR",
         }
-        
+
         aiodns_type = query_type_map.get(record_type.upper())
         if not aiodns_type:
             raise ValueError(f"Unsupported record type: {record_type}")
-        
+
         # Perform async DNS query
         try:
             result = await self.resolver.query(domain, aiodns_type)
-            
+
             # Format results based on record type
             if isinstance(result, list):
-                return [self._format_record(record_type.upper(), record) for record in result]
+                return [
+                    self._format_record(record_type.upper(), record)
+                    for record in result
+                ]
             else:
                 return [self._format_record(record_type.upper(), result)]
-                
+
         except Exception as e:
             # Re-raise with consistent error types for handling
             raise e
-    
+
     def _format_record(self, record_type: str, record: Any) -> str:
         """
         Format DNS record based on type
-        
+
         Args:
             record_type: DNS record type
             record: Raw DNS record from aiodns
-            
+
         Returns:
             Formatted record string
         """
         if record_type == "MX":
             # Handle both aiodns (priority/host) and RFC standard (preference/exchange) formats
-            if hasattr(record, 'priority') and hasattr(record, 'host'):
+            if hasattr(record, "priority") and hasattr(record, "host"):
                 return f"{record.priority} {record.host}"
-            elif hasattr(record, 'preference') and hasattr(record, 'exchange'):
+            elif hasattr(record, "preference") and hasattr(record, "exchange"):
                 return f"{record.preference} {record.exchange}"
             else:
                 return str(record)
@@ -156,10 +159,10 @@ class AsyncDNSResolver:
             return f"{record.mname} {record.rname} {record.serial} {record.refresh} {record.retry} {record.expire} {record.minimum}"
         elif record_type == "TXT":
             # Handle TXT records which can be bytes or strings
-            if hasattr(record, 'text'):
+            if hasattr(record, "text"):
                 text = record.text
                 if isinstance(text, bytes):
-                    return text.decode('utf-8', errors='replace')
+                    return text.decode("utf-8", errors="replace")
                 return str(text)
             return str(record)
         elif record_type == "SRV":
@@ -167,12 +170,12 @@ class AsyncDNSResolver:
         elif record_type == "CAA":
             return f"{record.flags} {record.tag} {record.value}"
         elif record_type == "NS":
-            return str(record.host if hasattr(record, 'host') else record)
+            return str(record.host if hasattr(record, "host") else record)
         else:
             # Default formatting for A, AAAA, CNAME, PTR
-            if hasattr(record, 'host'):
+            if hasattr(record, "host"):
                 return str(record.host)
-            elif hasattr(record, 'name'):
+            elif hasattr(record, "name"):
                 return str(record.name)
             else:
                 return str(record)
@@ -180,23 +183,21 @@ class AsyncDNSResolver:
 
 def create_resolver(
     nameserver: Optional[str] = None,
-    resolver_type: str = "system", 
-    timeout: float = 10.0
+    resolver_type: str = "system",
+    timeout: float = 10.0,
 ) -> AsyncDNSResolver:
     """
     Factory function to create async DNS resolver
-    
+
     Args:
         nameserver: Custom nameserver IP (overrides resolver_type)
         resolver_type: Predefined resolver type
         timeout: Query timeout in seconds
-        
+
     Returns:
         Configured AsyncDNSResolver instance
     """
     nameservers = [nameserver] if nameserver else None
     return AsyncDNSResolver(
-        nameservers=nameservers,
-        resolver_type=resolver_type,
-        timeout=timeout
+        nameservers=nameservers, resolver_type=resolver_type, timeout=timeout
     )

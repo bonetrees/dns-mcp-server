@@ -11,9 +11,15 @@ mcp = FastMCP("DNS OSINT Server")
 
 # Import tool modules to register their functions with the mcp instance
 # This plugin-style architecture automatically registers all @mcp.tool() decorated functions
-from . import core_tools      # Basic async DNS tools (dns_query, dns_reverse_lookup, dns_query_all)
-from . import bulk_tools      # Async bulk operations (dns_bulk_query, dns_bulk_reverse_lookup)
-from . import osint_tools     # OSINT analysis tools (dns_propagation_check, dns_wildcard_check, dns_response_analysis)
+from . import (
+    core_tools,
+)  # Basic async DNS tools (dns_query, dns_reverse_lookup, dns_query_all)
+from . import (
+    bulk_tools,
+)  # Async bulk operations (dns_bulk_query, dns_bulk_reverse_lookup)
+from . import (
+    osint_tools,
+)  # OSINT analysis tools (dns_propagation_check, dns_wildcard_check, dns_response_analysis)
 
 
 def main():

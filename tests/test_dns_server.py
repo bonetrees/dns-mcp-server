@@ -16,7 +16,7 @@ class TestResolverConfigurations:
     def test_resolver_configs_exist(self):
         """Test that all expected resolver configs exist"""
         expected_resolvers = ["public", "google", "cloudflare", "quad9", "opendns"]
-        
+
         for resolver_type in expected_resolvers:
             assert resolver_type in RESOLVER_CONFIGS
             assert isinstance(RESOLVER_CONFIGS[resolver_type], list)
@@ -74,9 +74,9 @@ class TestErrorFormatting:
         """Test NXDOMAIN error formatting"""
         error = Exception("NXDOMAIN")
         context = {"domain": "nonexistent.com"}
-        
+
         result = format_error_response(error, context)
-        
+
         assert result["error"] == "domain_not_found"
         assert result["type"] == "NXDOMAIN"
         assert result["domain"] == "nonexistent.com"
@@ -87,9 +87,9 @@ class TestErrorFormatting:
         """Test NoAnswer error formatting"""
         error = Exception("No answer")
         context = {"domain": "example.com", "record_type": "AAAA"}
-        
+
         result = format_error_response(error, context)
-        
+
         assert result["error"] == "no_records"
         assert result["type"] == "NoAnswer"
         assert "osint_insights" in result
@@ -97,9 +97,9 @@ class TestErrorFormatting:
     def test_timeout_error_formatting(self):
         """Test timeout error formatting"""
         error = Exception("timeout")
-        
+
         result = format_error_response(error)
-        
+
         assert result["error"] == "timeout"
         assert result["type"] == "Timeout"
         assert "osint_insights" in result
@@ -107,9 +107,9 @@ class TestErrorFormatting:
     def test_generic_error_formatting(self):
         """Test generic error formatting"""
         error = ValueError("Invalid input")
-        
+
         result = format_error_response(error)
-        
+
         assert result["error"] == "unknown"
         assert result["type"] == "ValueError"
         assert result["details"] == "Invalid input"
@@ -122,32 +122,32 @@ class TestRecordFormatting:
     def test_mx_record_formatting(self):
         """Test MX record formatting via resolver"""
         resolver = create_resolver()
-        
+
         # Test MX record with aiodns structure (priority/host)
         class MockMXRecord:
             def __init__(self, priority, host):
                 self.priority = priority
                 self.host = host
-        
+
         mx_record = MockMXRecord(10, "mail.example.com")
         formatted = resolver._format_record("MX", mx_record)
         assert formatted == "10 mail.example.com"
-        
+
         # Test MX record with RFC standard structure (preference/exchange)
         class MockRFCMXRecord:
             def __init__(self, preference, exchange):
                 self.preference = preference
                 self.exchange = exchange
-        
+
         rfc_mx_record = MockRFCMXRecord(20, "backup.example.com")
         formatted_rfc = resolver._format_record("MX", rfc_mx_record)
         assert formatted_rfc == "20 backup.example.com"
-        
+
         # Test MX record fallback (no recognized attributes)
         class MockSimpleMXRecord:
             def __str__(self):
                 return "30 fallback.example.com"
-        
+
         simple_mx_record = MockSimpleMXRecord()
         formatted_simple = resolver._format_record("MX", simple_mx_record)
         assert formatted_simple == "30 fallback.example.com"
@@ -155,26 +155,26 @@ class TestRecordFormatting:
     def test_txt_record_formatting(self):
         """Test TXT record formatting via resolver"""
         resolver = create_resolver()
-        
+
         # Mock TXT record with text attribute (matches aiodns structure)
         class MockTXTRecord:
             def __init__(self, text):
                 self.text = text
-        
+
         txt_record = MockTXTRecord("v=spf1 include:_spf.example.com ~all")
         formatted = resolver._format_record("TXT", txt_record)
         assert formatted == "v=spf1 include:_spf.example.com ~all"
-        
+
         # Test TXT record with bytes text (can happen in real scenarios)
         txt_record_bytes = MockTXTRecord(b"v=spf1 include:_spf.example.com ~all")
         formatted_bytes = resolver._format_record("TXT", txt_record_bytes)
         assert formatted_bytes == "v=spf1 include:_spf.example.com ~all"
-        
+
         # Test TXT record fallback (no text attribute)
         class MockSimpleTXTRecord:
             def __str__(self):
                 return "v=spf1 fallback test"
-        
+
         simple_txt_record = MockSimpleTXTRecord()
         formatted_simple = resolver._format_record("TXT", simple_txt_record)
         assert formatted_simple == "v=spf1 fallback test"
@@ -182,12 +182,12 @@ class TestRecordFormatting:
     def test_a_record_formatting(self):
         """Test A record formatting via resolver"""
         resolver = create_resolver()
-        
+
         # Mock A record
         class MockARecord:
             def __str__(self):
                 return "192.168.1.1"
-        
+
         a_record = MockARecord()
         formatted = resolver._format_record("A", a_record)
         assert formatted == "192.168.1.1"
@@ -203,8 +203,10 @@ class TestAsyncIntegration:
         """Test actual async DNS query (requires network)"""
         from dns_mcp_server.core_tools import dns_query
 
-        # Test with a well-known domain  
-        result = await dns_query(domain="sans.com", record_type="A", resolver_type="google")
+        # Test with a well-known domain
+        result = await dns_query(
+            domain="sans.com", record_type="A", resolver_type="google"
+        )
 
         assert "domain" in result
         assert result["domain"] == "sans.com"
@@ -250,10 +252,7 @@ class TestAsyncIntegration:
 
         domains = ["sans.com", "hackthissite.org"]
         result = await dns_bulk_query(
-            domains=domains,
-            record_type="A",
-            resolver_type="cloudflare",
-            max_workers=2
+            domains=domains, record_type="A", resolver_type="cloudflare", max_workers=2
         )
 
         assert result["bulk_query"] is True
