@@ -1,23 +1,51 @@
 """
 Async DNS resolver configuration and management
-Supports multiple resolver types with aiodns for async operations
+
+This module provides async DNS resolver functionality with aiodns integration,
+supporting multiple resolver types and automatic rate limiting. It's designed
+for high-performance DNS operations in OSINT and threat intelligence scenarios.
+
+Key Features:
+- Async DNS queries with aiodns
+- Per-resolver rate limiting (30 req/sec per resolver type)
+- Multiple public DNS resolver support (Google, Cloudflare, Quad9, etc.)
+- Automatic DNS record formatting for different record types
+- Thread-safe resolver instances for concurrent operations
+
+Usage Example:
+    ```python
+    from dns_mcp_server.resolvers import create_resolver
+    
+    # Create async resolver
+    resolver = create_resolver(resolver_type="google", timeout=5.0)
+    
+    # Perform async DNS query
+    records = await resolver.query("example.com", "A")
+    print(f"A records: {records}")
+    ```
+
+Resolver Types:
+- system: Use system default resolvers
+- google: Google DNS (8.8.8.8, 8.8.4.4)
+- cloudflare: Cloudflare DNS (1.1.1.1, 1.0.0.1)
+- quad9: Quad9 DNS (9.9.9.9, 149.112.112.112)
+- opendns: OpenDNS (208.67.222.222, 208.67.220.220)
+- public: Multi-resolver (8.8.8.8, 1.1.1.1, 9.9.9.9)
+
+Supported Record Types:
+- A, AAAA, MX, TXT, NS, SOA, CNAME, CAA, SRV, PTR
+
+Note:
+    All DNS queries are automatically rate-limited per resolver type to prevent
+    overwhelming DNS servers and avoid blocking. The default rate limit is
+    30 requests per second per resolver.
 """
 
 import asyncio
-from typing import Optional, List
+from typing import Optional, List, Dict, Any, Union, Tuple
 import aiodns
-import dns.resolver
 from .rate_limiter import dns_rate_limiter
-
-
-# Resolver configurations
-RESOLVER_CONFIGS = {
-    "public": ["8.8.8.8", "1.1.1.1", "9.9.9.9"],
-    "google": ["8.8.8.8", "8.8.4.4"],
-    "cloudflare": ["1.1.1.1", "1.0.0.1"],
-    "quad9": ["9.9.9.9", "149.112.112.112"],
-    "opendns": ["208.67.222.222", "208.67.220.220"]
-}
+from .config import RESOLVER_CONFIGS, config
 
 
 class AsyncDNSResolver:
@@ -105,7 +133,7 @@ class AsyncDNSResolver:
             # Re-raise with consistent error types for handling
             raise e
     
-    def _format_record(self, record_type: str, record) -> str:
+    def _format_record(self, record_type: str, record: Any) -> str:
         """
         Format DNS record based on type
         

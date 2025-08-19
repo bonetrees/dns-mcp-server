@@ -35,10 +35,16 @@ class TestAsyncDNSResolver:
     @patch('aiodns.DNSResolver.query')
     async def test_successful_query(self, mock_query):
         """Test successful DNS query"""
-        # Mock aiodns response
+        # Mock aiodns response with proper structure for A records
         mock_record = Mock()
+        mock_record.host = "192.168.1.1"  # A records have .host attribute
         mock_record.__str__ = Mock(return_value="192.168.1.1")
-        mock_query.return_value = [mock_record]
+        
+        # Make the mock query return an awaitable
+        async def async_mock_result():
+            return [mock_record]
+        
+        mock_query.return_value = async_mock_result()
         
         resolver = create_resolver()
         result = await resolver.query("example.com", "A")
