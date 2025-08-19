@@ -15,7 +15,7 @@ from dns_mcp_server.server import (
 def main():
     """Demonstrate DNS OSINT capabilities"""
 
-    print("🔍 DNS OSINT MCP Server - Example Usage")
+    print("DNS OSINT MCP Server - Example Usage")
     print("=" * 50)
 
     # Example 1: Basic A record lookup
@@ -84,7 +84,7 @@ def main():
         records = result.get("records", ["ERROR"])
         print(f"  {resolver:>10}: {records}")
 
-    print("\n✅ DNS OSINT examples completed!")
+    print("\nDNS OSINT examples completed!")
     print("\nThis demonstrates the power of the DNS MCP Server for:")
     print("• Threat actor infrastructure mapping")
     print("• Domain reputation analysis")
