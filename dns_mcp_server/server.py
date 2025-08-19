@@ -11,6 +11,9 @@ mcp = FastMCP("DNS OSINT Server")
 
 # Import tool modules to register their functions with the mcp instance
 # This plugin-style architecture automatically registers all @mcp.tool() decorated functions
+from . import bulk_tools  # noqa: F401
+from . import core_tools  # noqa: F401
+from . import osint_tools  # noqa: F401
 
 
 def main():
