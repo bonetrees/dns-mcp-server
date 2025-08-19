@@ -15,10 +15,10 @@ Key Features:
 Usage Example:
     ```python
     from dns_mcp_server.resolvers import create_resolver
-    
+
     # Create async resolver
     resolver = create_resolver(resolver_type="google", timeout=5.0)
-    
+
     # Perform async DNS query
     records = await resolver.query("example.com", "A")
     print(f"A records: {records}")
@@ -41,11 +41,12 @@ Note:
     30 requests per second per resolver.
 """
 
-import asyncio
-from typing import Optional, List, Dict, Any, Union, Tuple
+from typing import Any, Optional
+
 import aiodns
+
+from .config import RESOLVER_CONFIGS
 from .rate_limiter import dns_rate_limiter
-from .config import RESOLVER_CONFIGS, config
 
 
 class AsyncDNSResolver:
@@ -55,7 +56,7 @@ class AsyncDNSResolver:
 
     def __init__(
         self,
-        nameservers: Optional[List[str]] = None,
+        nameservers: Optional[list[str]] = None,
         resolver_type: str = "system",
         timeout: float = 10.0,
     ):
@@ -84,7 +85,7 @@ class AsyncDNSResolver:
             # Use system default resolvers
             self.resolver_id = "system"
 
-    async def query(self, domain: str, record_type: str) -> List[str]:
+    async def query(self, domain: str, record_type: str) -> list[str]:
         """
         Perform rate-limited async DNS query
 

@@ -3,7 +3,6 @@ Configuration management for DNS OSINT MCP Server
 Centralized settings for rate limiting, timeouts, resolvers, and default values
 """
 
-from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 
 
@@ -42,7 +41,7 @@ class DNSServerConfig:
     anomaly_threshold_multiplier: float = (
         2.0  # standard deviations for anomaly detection
     )
-    performance_thresholds: Dict[str, float] = field(
+    performance_thresholds: dict[str, float] = field(
         default_factory=lambda: {
             "excellent": 0.1,
             "good": 0.3,

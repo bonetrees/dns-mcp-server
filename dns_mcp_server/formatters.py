@@ -4,12 +4,12 @@ Handles formatting of various DNS record types and error responses
 """
 
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 
 
 def format_error_response(
-    error: Exception, context: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    error: Exception, context: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """
     Format error responses with OSINT context and insights
 
@@ -141,9 +141,9 @@ def format_dns_response(
     record_type: str,
     records: list,
     query_time: float,
-    resolver_info: Dict[str, Any],
+    resolver_info: dict[str, Any],
     error: Optional[Exception] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Format DNS query response with comprehensive metadata
 
@@ -185,8 +185,8 @@ def format_bulk_response(
     record_type: str,
     results: list,
     total_time: float,
-    resolver_info: Dict[str, Any],
-) -> Dict[str, Any]:
+    resolver_info: dict[str, Any],
+) -> dict[str, Any]:
     """
     Format bulk DNS query response
 

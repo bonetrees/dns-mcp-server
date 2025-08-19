@@ -4,17 +4,18 @@ Testing centralized configuration, validation, and utility functions
 """
 
 import pytest
+
 from dns_mcp_server.config import (
+    CDN_INDICATORS,
+    DEFAULT_PROPAGATION_RESOLVERS,
+    RESOLVER_CONFIGS,
+    SUPPORTED_RECORD_TYPES,
     DNSServerConfig,
     config,
-    validate_record_type,
-    validate_resolver_type,
     get_performance_rating,
     is_cdn_related,
-    RESOLVER_CONFIGS,
-    DEFAULT_PROPAGATION_RESOLVERS,
-    SUPPORTED_RECORD_TYPES,
-    CDN_INDICATORS,
+    validate_record_type,
+    validate_resolver_type,
 )
 
 
@@ -260,10 +261,10 @@ class TestConfigurationIntegration:
 
     def test_config_import_in_modules(self):
         """Test that configuration can be imported by other modules"""
-        from dns_mcp_server.resolvers import RESOLVER_CONFIGS as resolver_configs
         from dns_mcp_server.osint_tools import (
             DEFAULT_PROPAGATION_RESOLVERS as osint_resolvers,
         )
+        from dns_mcp_server.resolvers import RESOLVER_CONFIGS as resolver_configs
 
         # These should be the same as our centralized config
         assert resolver_configs == RESOLVER_CONFIGS

@@ -5,23 +5,23 @@ High-performance concurrent DNS queries with rate limiting
 
 import asyncio
 import time
-import dns.reversename
-from typing import Dict, List, Optional
 
-from .server import mcp
-from .resolvers import create_resolver
+import dns.reversename
+
 from .formatters import format_bulk_response, format_error_response
+from .resolvers import create_resolver
+from .server import mcp
 
 
 @mcp.tool()
 async def dns_bulk_query(
-    domains: List[str],
+    domains: list[str],
     record_type: str = "A",
-    nameserver: Optional[str] = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
     max_workers: int = 10,
-) -> Dict:
+) -> dict:
     """
     Perform concurrent bulk DNS queries for multiple domains
 
@@ -57,7 +57,7 @@ async def dns_bulk_query(
 
     start_time = time.time()
 
-    async def query_single_domain(domain: str) -> Dict:
+    async def query_single_domain(domain: str) -> dict:
         """Query single domain with comprehensive error handling"""
         domain_start = time.time()
 
@@ -144,12 +144,12 @@ async def dns_bulk_query(
 
 @mcp.tool()
 async def dns_bulk_reverse_lookup(
-    ips: List[str],
-    nameserver: Optional[str] = None,
+    ips: list[str],
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
     max_workers: int = 10,
-) -> Dict:
+) -> dict:
     """
     Perform concurrent bulk reverse DNS lookups for multiple IP addresses
 
@@ -179,7 +179,7 @@ async def dns_bulk_reverse_lookup(
 
     start_time = time.time()
 
-    async def reverse_lookup_single_ip(ip: str) -> Dict:
+    async def reverse_lookup_single_ip(ip: str) -> dict:
         """Reverse lookup single IP with error handling"""
         try:
             # Generate reverse DNS name

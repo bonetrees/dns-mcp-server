@@ -3,14 +3,14 @@ Tests for async DNS functionality
 Testing the new async core tools and bulk operations
 """
 
-import pytest
-import asyncio
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
-from dns_mcp_server.core_tools import dns_query, dns_reverse_lookup, dns_query_all
-from dns_mcp_server.bulk_tools import dns_bulk_query, dns_bulk_reverse_lookup
-from dns_mcp_server.resolvers import AsyncDNSResolver, create_resolver
+import pytest
+
+from dns_mcp_server.bulk_tools import dns_bulk_query
+from dns_mcp_server.core_tools import dns_query, dns_query_all
 from dns_mcp_server.rate_limiter import DNSRateLimiter
+from dns_mcp_server.resolvers import create_resolver
 
 
 class TestAsyncDNSResolver:

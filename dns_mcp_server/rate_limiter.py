@@ -3,8 +3,6 @@ Rate limiting utilities for DNS operations
 Implements per-resolver rate limiting to prevent overwhelming DNS servers
 """
 
-import asyncio
-from typing import Dict
 from asyncio_throttle import Throttler
 
 
@@ -22,7 +20,7 @@ class DNSRateLimiter:
             rate_limit: Requests per second per resolver (default: 30)
         """
         self.rate_limit = rate_limit
-        self._throttlers: Dict[str, Throttler] = {}
+        self._throttlers: dict[str, Throttler] = {}
 
     def get_throttler(self, resolver_type: str) -> Throttler:
         """
@@ -36,7 +34,8 @@ class DNSRateLimiter:
         """
         if resolver_type not in self._throttlers:
             self._throttlers[resolver_type] = Throttler(
-                rate_limit=self.rate_limit, period=1.0  # Per second
+                rate_limit=self.rate_limit,
+                period=1.0,  # Per second
             )
         return self._throttlers[resolver_type]
 
@@ -51,7 +50,7 @@ class DNSRateLimiter:
         async with throttler:
             pass  # Token acquired and released automatically
 
-    def get_stats(self) -> Dict[str, Dict]:
+    def get_stats(self) -> dict[str, dict]:
         """
         Get rate limiting statistics for all resolvers
 

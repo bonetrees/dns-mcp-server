@@ -3,11 +3,11 @@ Test suite for DNS MCP Server (Legacy compatibility tests)
 Tests to ensure our new async architecture maintains compatibility
 """
 
-import pytest
-from unittest.mock import Mock
 
-from dns_mcp_server.resolvers import RESOLVER_CONFIGS, create_resolver
+import pytest
+
 from dns_mcp_server.formatters import format_error_response
+from dns_mcp_server.resolvers import RESOLVER_CONFIGS, create_resolver
 
 
 class TestResolverConfigurations:

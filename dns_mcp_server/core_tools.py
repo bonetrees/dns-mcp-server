@@ -5,23 +5,23 @@ Basic DNS query and reverse lookup functionality with async support
 
 import asyncio
 import time
-from typing import Dict, Optional
+
 import dns.reversename
 
-from .server import mcp
-from .resolvers import create_resolver
-from .formatters import format_dns_response, format_error_response
 from .config import config
+from .formatters import format_dns_response, format_error_response
+from .resolvers import create_resolver
+from .server import mcp
 
 
 @mcp.tool()
 async def dns_query(
     domain: str,
     record_type: str = "A",
-    nameserver: Optional[str] = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
-) -> Dict:
+) -> dict:
     """
     Async DNS query for specific domain and record type
 
@@ -69,10 +69,10 @@ async def dns_query(
 @mcp.tool()
 async def dns_reverse_lookup(
     ip: str,
-    nameserver: Optional[str] = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
-) -> Dict:
+) -> dict:
     """
     Async reverse DNS lookup (PTR) for an IP address
 
@@ -140,10 +140,10 @@ async def dns_reverse_lookup(
 @mcp.tool()
 async def dns_query_all(
     domain: str,
-    nameserver: Optional[str] = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
-) -> Dict:
+) -> dict:
     """
     Query all DNS record types concurrently for comprehensive domain profiling
 

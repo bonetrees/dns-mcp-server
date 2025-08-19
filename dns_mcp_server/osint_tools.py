@@ -18,33 +18,33 @@ Usage Examples:
         dns_wildcard_check,
         dns_response_analysis
     )
-    
+
     # Check DNS consistency across resolvers
     result = await dns_propagation_check(
         domain="suspicious-domain.com",
         record_type="A"
     )
-    
+
     if not result["is_consistent"]:
         print("WARNING: DNS inconsistency detected!")
         print(f"Trust level: {result['osint_analysis']['trust_level']}")
-    
+
     # Detect wildcard DNS (common in phishing)
     wildcard_result = await dns_wildcard_check(
         domain="phishing-domain.com",
         test_count=5
     )
-    
+
     if wildcard_result["has_wildcard"]:
         risk = wildcard_result["osint_insights"]["risk_level"]
         print(f"Wildcard DNS detected - Risk: {risk}")
-    
+
     # Analyze response times for anomalies
     timing_result = await dns_response_analysis(
         domain="c2-server.com",
         iterations=15
     )
-    
+
     rating = timing_result["osint_insights"]["performance_rating"]
     print(f"Performance: {rating}")
     ```
@@ -71,31 +71,30 @@ Note:
 """
 
 import asyncio
-import time
 import secrets
-import string
 import statistics
-from typing import Dict, List, Optional, Set, Tuple
+import string
+import time
 from collections import defaultdict
 
-from .server import mcp
-from .resolvers import create_resolver
-from .formatters import format_error_response
 from .config import (
     DEFAULT_PROPAGATION_RESOLVERS,
     config,
     get_performance_rating,
     is_cdn_related,
 )
+from .formatters import format_error_response
+from .resolvers import create_resolver
+from .server import mcp
 
 
 @mcp.tool()
 async def dns_propagation_check(
     domain: str,
     record_type: str = "A",
-    resolvers: Optional[Dict[str, str]] = None,
+    resolvers: dict[str, str] | None = None,
     timeout: int = 10,
-) -> Dict:
+) -> dict:
     """
     Check DNS propagation across multiple resolvers to detect inconsistencies
 
@@ -120,7 +119,7 @@ async def dns_propagation_check(
     start_time = time.time()
     results = {}
 
-    async def query_resolver(resolver_name: str, resolver_ip: str) -> Tuple[str, Dict]:
+    async def query_resolver(resolver_name: str, resolver_ip: str) -> tuple[str, dict]:
         """Query a single resolver and return results"""
         try:
             resolver = create_resolver(
@@ -275,11 +274,11 @@ async def dns_propagation_check(
 @mcp.tool()
 async def dns_wildcard_check(
     domain: str,
-    test_count: int = None,
-    nameserver: Optional[str] = None,
+    test_count: int | None = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
-) -> Dict:
+) -> dict:
     """
     Check if domain has wildcard DNS entries by testing random subdomains
 
@@ -321,10 +320,9 @@ async def dns_wildcard_check(
         test_subdomains.append(f"{random_subdomain}.{domain}")
 
     # Test both A and CNAME records for each subdomain
-    wildcard_results = {}
     test_results = []
 
-    async def test_subdomain(test_domain: str, record_type: str) -> Dict:
+    async def test_subdomain(test_domain: str, record_type: str) -> dict:
         """Test a single subdomain for a specific record type"""
         try:
             query_start = time.time()
@@ -472,12 +470,12 @@ async def dns_wildcard_check(
 @mcp.tool()
 async def dns_response_analysis(
     domain: str,
-    iterations: int = None,
+    iterations: int | None = None,
     record_type: str = "A",
-    nameserver: Optional[str] = None,
+    nameserver: str | None = None,
     resolver_type: str = "system",
     timeout: int = 10,
-) -> Dict:
+) -> dict:
     """
     Analyze DNS response times for anomaly detection
 

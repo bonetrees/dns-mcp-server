@@ -3,15 +3,15 @@ Tests for OSINT DNS analysis tools
 Testing propagation check, wildcard detection, and response time analysis
 """
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-import asyncio
-from unittest.mock import Mock, patch, AsyncMock
 
 from dns_mcp_server.osint_tools import (
-    dns_propagation_check,
-    dns_wildcard_check,
-    dns_response_analysis,
     DEFAULT_PROPAGATION_RESOLVERS,
+    dns_propagation_check,
+    dns_response_analysis,
+    dns_wildcard_check,
 )
 
 
@@ -74,7 +74,9 @@ class TestDNSPropagationCheck:
 
         # This will likely fail due to network, but should handle gracefully
         result = await dns_propagation_check(
-            domain="example.com", resolvers=custom_resolvers, timeout=1  # Short timeout
+            domain="example.com",
+            resolvers=custom_resolvers,
+            timeout=1,  # Short timeout
         )
 
         assert result["total_resolvers_queried"] == 2
@@ -153,7 +155,6 @@ class TestDNSWildcardCheck:
 
     def test_random_subdomain_generation(self):
         """Test that random subdomains are properly generated"""
-        import secrets
         import string
 
         # Mock secrets.choice to ensure reproducible test

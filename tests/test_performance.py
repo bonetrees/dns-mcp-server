@@ -3,16 +3,16 @@ Performance benchmark tests for DNS OSINT MCP Server
 Measuring and validating performance improvements from async implementation
 """
 
-import pytest
 import asyncio
 import time
 from unittest.mock import AsyncMock, patch
-from typing import List, Dict
 
-from dns_mcp_server.core_tools import dns_query, dns_query_all
-from dns_mcp_server.bulk_tools import dns_bulk_query, dns_bulk_reverse_lookup
-from dns_mcp_server.osint_tools import dns_propagation_check, dns_response_analysis
+import pytest
+
+from dns_mcp_server.bulk_tools import dns_bulk_query
 from dns_mcp_server.config import config
+from dns_mcp_server.core_tools import dns_query, dns_query_all
+from dns_mcp_server.osint_tools import dns_propagation_check
 
 
 class TestPerformanceBenchmarks:
@@ -104,7 +104,7 @@ class TestPerformanceBenchmarks:
         assert speedup > 3.0, f"Propagation check speedup {speedup} too low"
         assert result["total_resolvers_queried"] == 6
 
-        print(f"\nPropagation Check Performance:")
+        print("\nPropagation Check Performance:")
         print(f"  6 resolvers: {actual_time:.3f}s (speedup: {speedup:.1f}x)")
 
     @patch("dns_mcp_server.core_tools.create_resolver")
@@ -140,7 +140,7 @@ class TestPerformanceBenchmarks:
         ), f"Query all speedup {speedup} too low (expected >2.5x with concurrency limit)"
         assert result["record_types_found"] >= 3  # Should find some records
 
-        print(f"\nQuery All Performance (with concurrency control):")
+        print("\nQuery All Performance (with concurrency control):")
         print(f"  9 record types: {actual_time:.3f}s (speedup: {speedup:.1f}x)")
         print(
             f"  Note: Concurrency limited to {config.dns_query_all_concurrency} for DNS server friendliness"
@@ -170,7 +170,7 @@ class TestPerformanceBenchmarks:
             per_acquisition < 0.001
         ), f"Rate limiting overhead too high: {per_acquisition:.4f}s"
 
-        print(f"\nRate Limiting Performance:")
+        print("\nRate Limiting Performance:")
         print(
             f"  50 acquisitions: {total_time:.4f}s ({per_acquisition*1000:.2f}ms each)"
         )
@@ -199,7 +199,7 @@ class TestMemoryEfficiency:
         assert result["successful_queries"] == large_domain_count
         assert len(result["results"]) == large_domain_count
 
-        print(f"\nMemory Efficiency Test:")
+        print("\nMemory Efficiency Test:")
         print(f"  {large_domain_count} domains processed successfully")
 
     async def test_concurrent_tool_memory_usage(self):
@@ -218,8 +218,8 @@ class TestMemoryEfficiency:
         # All should complete (successfully or with errors)
         assert len(results) == 10
 
-        print(f"\nConcurrent Memory Test:")
-        print(f"  10 concurrent operations completed")
+        print("\nConcurrent Memory Test:")
+        print("  10 concurrent operations completed")
 
 
 class TestThroughputBenchmarks:
@@ -263,7 +263,7 @@ class TestThroughputBenchmarks:
             )
 
         # Analyze throughput scaling
-        print(f"\nThroughput Benchmark Results:")
+        print("\nThroughput Benchmark Results:")
         for result in throughput_results:
             print(
                 f"  {result['workers']} workers: {result['throughput']:.1f} queries/sec"

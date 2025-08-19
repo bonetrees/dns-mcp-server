@@ -3,19 +3,19 @@ Edge case and error resilience tests for DNS OSINT MCP Server
 Testing network failures, malformed inputs, IPv6, and extreme conditions
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, patch
 
-from dns_mcp_server.core_tools import dns_query, dns_reverse_lookup, dns_query_all
+import pytest
+
 from dns_mcp_server.bulk_tools import dns_bulk_query, dns_bulk_reverse_lookup
+from dns_mcp_server.config import config
+from dns_mcp_server.core_tools import dns_query, dns_query_all, dns_reverse_lookup
 from dns_mcp_server.osint_tools import (
     dns_propagation_check,
-    dns_wildcard_check,
     dns_response_analysis,
+    dns_wildcard_check,
 )
-from dns_mcp_server.resolvers import create_resolver
-from dns_mcp_server.config import config
 
 
 class TestNetworkFailures:
@@ -141,7 +141,8 @@ class TestMalformedInputs:
         """Test with extreme parameter values"""
         # Test with very short timeout (but not too extreme)
         result = await dns_query(
-            domain="example.com", timeout=1  # Short but reasonable timeout
+            domain="example.com",
+            timeout=1,  # Short but reasonable timeout
         )
         assert "domain" in result
 
@@ -223,7 +224,9 @@ class TestConcurrencyStress:
         domains = [f"test{i}.com" for i in range(20)]  # Reduced from 50
 
         result = await dns_bulk_query(
-            domains=domains, max_workers=20, timeout=5  # High concurrency
+            domains=domains,
+            max_workers=20,
+            timeout=5,  # High concurrency
         )
 
         assert result["domain_count"] == 20
@@ -352,7 +355,9 @@ class TestConfigurationEdgeCases:
         """Test that tools properly validate configuration values"""
         # Test wildcard check with invalid count (should be clamped)
         result = await dns_wildcard_check(
-            domain="example.com", test_count=100, timeout=2  # Should be clamped to max
+            domain="example.com",
+            test_count=100,
+            timeout=2,  # Should be clamped to max
         )
 
         assert result["test_count"] <= config.max_wildcard_test_count
