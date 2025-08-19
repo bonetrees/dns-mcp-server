@@ -5,6 +5,7 @@ High-performance concurrent DNS queries with rate limiting
 
 import asyncio
 import time
+import dns.reversename
 from typing import Dict, List, Optional
 
 from .server import mcp
@@ -180,14 +181,66 @@ async def dns_bulk_reverse_lookup(
     
     async def reverse_lookup_single_ip(ip: str) -> Dict:
         """Reverse lookup single IP with error handling"""
-        # Use the existing dns_reverse_lookup function
-        result = await dns_reverse_lookup(
-            ip=ip,
-            nameserver=nameserver,
-            resolver_type=resolver_type,
-            timeout=timeout
-        )
-        return result
+        try:
+            # Generate reverse DNS name
+            reverse_name = dns.reversename.from_address(ip)
+            reverse_domain = str(reverse_name)
+            
+            resolver = create_resolver(
+                nameserver=nameserver,
+                resolver_type=resolver_type,
+                timeout=float(timeout)
+            )
+            
+            start_time = time.time()
+            error = None
+            hostnames = []
+            
+            try:
+                hostnames = await resolver.query(reverse_domain, "PTR")
+            except Exception as e:
+                error = e
+            
+            query_time = time.time() - start_time
+            
+            response = {
+                "ip": ip,
+                "reverse_domain": reverse_domain,
+                "nameserver": nameserver or resolver_type,
+                "query_time_seconds": round(query_time, 3)
+            }
+            
+            if error:
+                response["error"] = format_error_response(
+                    error,
+                    context={
+                        "ip": ip,
+                        "reverse_domain": reverse_domain,
+                        "resolver": resolver.resolver_id
+                    }
+                )
+            else:
+                response.update({
+                    "hostnames": hostnames,
+                    "hostname_count": len(hostnames)
+                })
+            
+            return response
+            
+        except Exception as e:
+            # Handle invalid IP address or other errors
+            return {
+                "ip": ip,
+                "nameserver": nameserver or resolver_type,
+                "query_time_seconds": 0.0,
+                "error": format_error_response(
+                    e,
+                    context={
+                        "ip": ip,
+                        "operation": "reverse_lookup"
+                    }
+                )
+            }
     
     # Execute concurrent reverse lookups with semaphore
     semaphore = asyncio.Semaphore(actual_workers)

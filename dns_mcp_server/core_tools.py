@@ -11,6 +11,7 @@ import dns.reversename
 from .server import mcp
 from .resolvers import create_resolver
 from .formatters import format_dns_response, format_error_response
+from .config import config
 
 
 @mcp.tool()
@@ -177,16 +178,20 @@ async def dns_query_all(
     
     start_time = time.time()
     
-    # Create tasks for concurrent execution
-    async def query_record_type(record_type: str):
-        """Query single record type with error handling"""
-        try:
-            records = await resolver.query(domain, record_type)
-            return record_type, records, None
-        except Exception as e:
-            return record_type, [], e
+    # Execute all queries concurrently with limited concurrency to avoid overwhelming resolver
+    semaphore = asyncio.Semaphore(config.dns_query_all_concurrency)  # Configurable concurrency limit
     
-    # Execute all queries concurrently
+    # Create tasks for concurrent execution with semaphore
+    async def query_record_type(record_type: str):
+        """Query single record type with error handling and rate limiting"""
+        async with semaphore:
+            try:
+                records = await resolver.query(domain, record_type)
+                return record_type, records, None
+            except Exception as e:
+                return record_type, [], e
+    
+    # Execute queries with controlled concurrency
     tasks = [query_record_type(rt) for rt in record_types]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     

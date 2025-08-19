@@ -25,6 +25,7 @@ class DNSServerConfig:
     # Concurrency Configuration
     default_max_workers: int = 10
     max_concurrent_workers: int = 50  # safety limit
+    dns_query_all_concurrency: int = 3  # concurrent queries to same resolver in query_all
     
     # Bulk Query Configuration
     default_bulk_delay: float = 0.1  # delay between queries in response analysis
