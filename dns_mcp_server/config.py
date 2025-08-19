@@ -174,6 +174,9 @@ def is_cdn_related(record: str) -> bool:
     Returns:
         True if record appears to be CDN/hosting related
     """
+    if record is None:
+        return False
+    
     record_lower = str(record).lower()
     return any(indicator in record_lower for indicator in CDN_INDICATORS)
 

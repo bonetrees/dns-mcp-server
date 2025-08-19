@@ -72,7 +72,7 @@ Note:
 
 import asyncio
 import time
-import random
+import secrets
 import string
 import statistics
 from typing import Dict, List, Optional, Set, Tuple
@@ -313,10 +313,9 @@ async def dns_wildcard_check(
     # Generate random subdomains (very unlikely to exist legitimately)
     test_subdomains = []
     for _ in range(test_count):
-        random_subdomain = ''.join(random.choices(
-            string.ascii_lowercase + string.digits, 
-            k=config.wildcard_subdomain_length
-        ))
+        random_subdomain = ''.join(secrets.choice(
+            string.ascii_lowercase + string.digits
+        ) for _ in range(config.wildcard_subdomain_length))
         test_subdomains.append(f"{random_subdomain}.{domain}")
     
     # Test both A and CNAME records for each subdomain
