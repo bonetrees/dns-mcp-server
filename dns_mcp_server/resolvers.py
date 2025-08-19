@@ -145,7 +145,13 @@ class AsyncDNSResolver:
             Formatted record string
         """
         if record_type == "MX":
-            return f"{record.priority} {record.host}"
+            # Handle both aiodns (priority/host) and RFC standard (preference/exchange) formats
+            if hasattr(record, 'priority') and hasattr(record, 'host'):
+                return f"{record.priority} {record.host}"
+            elif hasattr(record, 'preference') and hasattr(record, 'exchange'):
+                return f"{record.preference} {record.exchange}"
+            else:
+                return str(record)
         elif record_type == "SOA":
             return f"{record.mname} {record.rname} {record.serial} {record.refresh} {record.retry} {record.expire} {record.minimum}"
         elif record_type == "TXT":

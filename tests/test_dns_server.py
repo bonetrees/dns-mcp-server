@@ -123,7 +123,7 @@ class TestRecordFormatting:
         """Test MX record formatting via resolver"""
         resolver = create_resolver()
         
-        # Mock MX record
+        # Test MX record with aiodns structure (priority/host)
         class MockMXRecord:
             def __init__(self, priority, host):
                 self.priority = priority
@@ -132,12 +132,31 @@ class TestRecordFormatting:
         mx_record = MockMXRecord(10, "mail.example.com")
         formatted = resolver._format_record("MX", mx_record)
         assert formatted == "10 mail.example.com"
+        
+        # Test MX record with RFC standard structure (preference/exchange)
+        class MockRFCMXRecord:
+            def __init__(self, preference, exchange):
+                self.preference = preference
+                self.exchange = exchange
+        
+        rfc_mx_record = MockRFCMXRecord(20, "backup.example.com")
+        formatted_rfc = resolver._format_record("MX", rfc_mx_record)
+        assert formatted_rfc == "20 backup.example.com"
+        
+        # Test MX record fallback (no recognized attributes)
+        class MockSimpleMXRecord:
+            def __str__(self):
+                return "30 fallback.example.com"
+        
+        simple_mx_record = MockSimpleMXRecord()
+        formatted_simple = resolver._format_record("MX", simple_mx_record)
+        assert formatted_simple == "30 fallback.example.com"
 
     def test_txt_record_formatting(self):
         """Test TXT record formatting via resolver"""
         resolver = create_resolver()
         
-        # Mock TXT record
+        # Mock TXT record with text attribute (matches aiodns structure)
         class MockTXTRecord:
             def __init__(self, text):
                 self.text = text
@@ -145,6 +164,20 @@ class TestRecordFormatting:
         txt_record = MockTXTRecord("v=spf1 include:_spf.example.com ~all")
         formatted = resolver._format_record("TXT", txt_record)
         assert formatted == "v=spf1 include:_spf.example.com ~all"
+        
+        # Test TXT record with bytes text (can happen in real scenarios)
+        txt_record_bytes = MockTXTRecord(b"v=spf1 include:_spf.example.com ~all")
+        formatted_bytes = resolver._format_record("TXT", txt_record_bytes)
+        assert formatted_bytes == "v=spf1 include:_spf.example.com ~all"
+        
+        # Test TXT record fallback (no text attribute)
+        class MockSimpleTXTRecord:
+            def __str__(self):
+                return "v=spf1 fallback test"
+        
+        simple_txt_record = MockSimpleTXTRecord()
+        formatted_simple = resolver._format_record("TXT", simple_txt_record)
+        assert formatted_simple == "v=spf1 fallback test"
 
     def test_a_record_formatting(self):
         """Test A record formatting via resolver"""
