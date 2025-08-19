@@ -130,12 +130,14 @@ class TestPerformanceBenchmarks:
         sequential_time = 9 * 0.02
         speedup = sequential_time / actual_time
         
-        # Should be much faster than sequential
-        assert speedup > 5.0, f"Query all speedup {speedup} too low"
+        # Updated expectation: with semaphore limit of 3, theoretical max is ~3x
+        # Actual will be slightly less due to overhead, so 2.5x is good performance
+        assert speedup > 2.5, f"Query all speedup {speedup} too low (expected >2.5x with concurrency limit)"
         assert result["record_types_found"] >= 3  # Should find some records
         
-        print(f"\nQuery All Performance:")
+        print(f"\nQuery All Performance (with concurrency control):")
         print(f"  9 record types: {actual_time:.3f}s (speedup: {speedup:.1f}x)")
+        print(f"  Note: Concurrency limited to {config.dns_query_all_concurrency} for DNS server friendliness")
     
     async def test_rate_limiting_performance_impact(self):
         """Test that rate limiting doesn't significantly impact performance"""
