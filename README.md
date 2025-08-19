@@ -1,13 +1,13 @@
 # DNS OSINT MCP Server
 
-A comprehensive DNS reconnaissance toolkit built as an MCP server for threat intelligence and OSINT investigations. Provides powerful DNS querying capabilities with support for multiple resolvers and concurrent operations.
+A DNS reconnaissance toolkit built as an MCP server for threat intelligence and OSINT investigations. Provides DNS querying capabilities with support for multiple resolvers and concurrent operations.
 
 ## 🚀 Features
 
 ### Core DNS Tools
 - **dns_query**: Query specific DNS record types (A, AAAA, MX, TXT, NS, SOA, CNAME, CAA, SRV, PTR)
 - **dns_reverse_lookup**: Reverse DNS (PTR) lookups for IP addresses
-- **dns_bulk_query**: Efficient concurrent bulk queries for multiple domains
+- **dns_bulk_query**: Concurrent bulk queries for multiple domains
 - **dns_bulk_reverse_lookup**: Concurrent reverse DNS lookups for multiple IPs
 - **dns_query_all**: Comprehensive domain profiling with concurrent queries of all record types
 
@@ -17,7 +17,7 @@ A comprehensive DNS reconnaissance toolkit built as an MCP server for threat int
 - **dns_response_analysis**: Analyze response times for anomaly detection
 
 ### Advanced Capabilities
-- **Async Performance**: High-speed concurrent operations with rate limiting (5-10x faster than sequential)
+- **Async Performance**: High-speed concurrent operations with rate limiting (3-5x faster than sequential)
 - **Multiple Resolver Support**: System, public, Google, Cloudflare, Quad9, OpenDNS, or custom resolvers
 - **Per-Resolver Rate Limiting**: 30 requests/second per resolver to prevent abuse
 - **OSINT-Focused Error Handling**: Detailed DNS exception analysis with actionable intelligence
@@ -27,7 +27,7 @@ A comprehensive DNS reconnaissance toolkit built as an MCP server for threat int
 
 ## 📋 Prerequisites
 
-- Python 3.9+
+- Python 3.10+
 - Poetry for dependency management
 
 ## 🏗️ Architecture
@@ -93,7 +93,9 @@ Add to your Claude MCP settings:
   }
 }
 ```
-
+- Note: You may need to add full paths to `poetry` and `dns-mcp-server`
+- Note: You may need to point poetry directly to your project folder file like:
+  `"args": ["run","-C", "/path/to/dns-mcp-server","python", "-m", "dns_mcp_server"]`
 ## 🕵️ OSINT Use Cases
 
 ### Threat Actor Infrastructure Mapping
@@ -286,9 +288,33 @@ poetry run isort .
 
 ## 📈 Future Enhancements
 
-- [ ] Subdomain enumeration capabilities
-- [ ] DNS zone transfer attempts
-- [ ] Certificate transparency integration
+### TODO: DNS Walking & Subdomain Discovery 🚶‍♂️
+*Added during pair programming session - August 19, 2025*
+
+- [ ] **Dictionary-Based Subdomain Enumeration**: Brute force common subdomains using wordlists
+  ```python
+  dns_subdomain_walk(domain="target.com", wordlist=["www", "mail", "api"], max_workers=50)
+  ```
+
+- [ ] **Certificate Transparency Integration**: Discover subdomains via CT logs
+  ```python  
+  dns_ct_subdomain_search(domain="target.com")  # Passive subdomain discovery
+  ```
+
+- [ ] **DNS Zone Transfer Attempts**: Try AXFR/IXFR zone transfers
+  ```python
+  dns_zone_transfer(domain="target.com")  # Attempt zone transfer
+  ```
+
+- [ ] **Passive DNS Database Queries**: Integration with passive DNS sources
+  ```python
+  dns_passive_lookup(domain="target.com")  # Historical DNS data
+  ```
+
+### Current Roadmap
+- [ ] Subdomain enumeration capabilities *(see DNS Walking section above)*
+- [ ] DNS zone transfer attempts *(see DNS Walking section above)*
+- [ ] Certificate transparency integration *(see DNS Walking section above)*
 - [ ] Historical DNS data analysis
 - [ ] Advanced correlation features
 - [ ] Export capabilities (JSON, CSV)
