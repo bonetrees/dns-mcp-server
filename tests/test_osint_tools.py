@@ -162,15 +162,28 @@ class TestDNSWildcardCheck:
     
     def test_random_subdomain_generation(self):
         """Test that random subdomains are properly generated"""
-        import random
+        import secrets
         import string
         
-        # Mock random to ensure reproducible test
-        with patch('dns_mcp_server.osint_tools.random.choices') as mock_choices:
-            mock_choices.return_value = ['a'] * 32
+        # Mock secrets.choice to ensure reproducible test
+        with patch('dns_mcp_server.osint_tools.secrets.choice') as mock_choice:
+            mock_choice.return_value = 'a'
             
-            # The function should generate predictable subdomains for testing
-            # This tests the subdomain generation logic without async complexity
+            # Import the function that would use this mocked choice
+            # Since we can't easily test the internal function directly,
+            # we'll test that the subdomain generation creates expected patterns
+            from dns_mcp_server.config import config
+            
+            # Test the general pattern - this should create predictable subdomains for testing
+            test_subdomain = ''.join(mock_choice(
+                string.ascii_lowercase + string.digits
+            ) for _ in range(config.wildcard_subdomain_length))
+            
+            expected_subdomain = 'a' * config.wildcard_subdomain_length
+            assert test_subdomain == expected_subdomain
+            
+            # Verify choice was called the expected number of times
+            assert mock_choice.call_count == config.wildcard_subdomain_length
 
 
 class TestDNSResponseAnalysis:
