@@ -157,7 +157,15 @@ class AsyncDNSResolver:
             else:
                 return str(record)
         elif record_type == "SOA":
-            return f"{record.mname} {record.rname} {record.serial} {record.refresh} {record.retry} {record.expire} {record.minimum}"
+            # Handle pycares SOA result structure (different from standard)
+            # pycares uses: nsname, hostmaster, serial, refresh, retry, expires, minttl
+            if hasattr(record, "nsname"):
+                return f"{record.nsname} {record.hostmaster} {record.serial} {record.refresh} {record.retry} {record.expires} {record.minttl}"
+            # Fallback for other implementations
+            elif hasattr(record, "mname"):
+                return f"{record.mname} {record.rname} {record.serial} {record.refresh} {record.retry} {record.expire} {record.minimum}"
+            else:
+                return str(record)
         elif record_type == "TXT":
             # Handle TXT records which can be bytes or strings
             if hasattr(record, "text"):
@@ -169,7 +177,15 @@ class AsyncDNSResolver:
         elif record_type == "SRV":
             return f"{record.priority} {record.weight} {record.port} {record.target}"
         elif record_type == "CAA":
-            return f"{record.flags} {record.tag} {record.value}"
+            # Handle pycares CAA result structure
+            # pycares uses: critical, property, value
+            if hasattr(record, "critical"):
+                return f"{record.critical} {record.property} {record.value}"
+            # Fallback for standard format
+            elif hasattr(record, "flags"):
+                return f"{record.flags} {record.tag} {record.value}"
+            else:
+                return str(record)
         elif record_type == "NS":
             return str(record.host if hasattr(record, "host") else record)
         else:

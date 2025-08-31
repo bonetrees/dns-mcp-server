@@ -9,6 +9,7 @@ import time
 import dns.reversename
 
 from .formatters import format_bulk_response, format_error_response
+from .param_utils import ensure_int
 from .resolvers import create_resolver
 from .server import mcp
 
@@ -48,6 +49,9 @@ async def dns_bulk_query(
             "results": [],
         }
 
+    # Ensure max_workers is an integer (handles FastMCP type conversion issues)
+    max_workers = ensure_int(max_workers) or 10
+    
     # Limit concurrent workers to prevent overwhelming resolvers
     actual_workers = min(max_workers, len(domains))
 
@@ -174,6 +178,9 @@ async def dns_bulk_reverse_lookup(
             "results": [],
         }
 
+    # Ensure max_workers is an integer (handles FastMCP type conversion issues)
+    max_workers = ensure_int(max_workers) or 10
+    
     # Limit concurrent workers
     actual_workers = min(max_workers, len(ips))
 

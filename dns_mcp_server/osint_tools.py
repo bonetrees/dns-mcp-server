@@ -84,6 +84,7 @@ from .config import (
     is_cdn_related,
 )
 from .formatters import format_error_response
+from .param_utils import validate_optional_int
 from .resolvers import create_resolver
 from .server import mcp
 
@@ -298,11 +299,10 @@ async def dns_wildcard_check(
     Returns:
         Dictionary with wildcard analysis and security implications
     """
-    # Use config default if not specified
-    if test_count is None:
-        test_count = config.default_wildcard_test_count
-
-    # Validate test count
+    # Validate and convert test_count parameter (handles FastMCP type issues)
+    test_count = validate_optional_int(test_count, config.default_wildcard_test_count)
+    
+    # Validate test count range
     test_count = config.validate_wildcard_count(test_count)
     resolver = create_resolver(
         nameserver=nameserver, resolver_type=resolver_type, timeout=float(timeout)
@@ -496,9 +496,8 @@ async def dns_response_analysis(
     Returns:
         Dictionary with response time analysis and anomaly detection
     """
-    # Use config default if not specified
-    if iterations is None:
-        iterations = config.default_propagation_iterations
+    # Validate and convert iterations parameter (handles FastMCP type issues)
+    iterations = validate_optional_int(iterations, config.default_propagation_iterations)
     resolver = create_resolver(
         nameserver=nameserver, resolver_type=resolver_type, timeout=float(timeout)
     )
