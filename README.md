@@ -11,7 +11,7 @@ A DNS reconnaissance toolkit built as an MCP server for threat intelligence and 
 - **dns_bulk_reverse_lookup**: Concurrent reverse DNS lookups for multiple IPs
 - **dns_query_all**: Comprehensive domain profiling with concurrent queries of all record types
 
-### OSINT Analysis Tools 🕵️
+### OSINT Analysis Tools
 - **dns_propagation_check**: Detect DNS inconsistencies across multiple resolvers
 - **dns_wildcard_check**: Identify wildcard DNS configurations and security risks
 - **dns_response_analysis**: Analyze response times for anomaly detection
@@ -30,7 +30,7 @@ A DNS reconnaissance toolkit built as an MCP server for threat intelligence and 
 - Python 3.10+
 - Poetry for dependency management
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 dns_mcp_server/
@@ -58,7 +58,7 @@ tests/
 - **OSINT-Focused**: Error messages include threat intelligence context
 - **Highly Testable**: Comprehensive mocking and integration tests
 
-## 🛠️ Installation
+## Installation
 
 1. **Clone and setup the repository:**
 ```bash
@@ -78,7 +78,7 @@ python -m dns_mcp_server
 poetry run python -m dns_mcp_server
 ```
 
-## 🔧 Configuration
+## Configuration
 
 Add to your Claude MCP settings:
 
@@ -276,7 +276,7 @@ poetry run black .
 poetry run isort .
 ```
 
-## 🚀 Completed Enhancements
+## Completed Enhancements
 
 - **Async Performance Optimization**: 5-10x faster bulk queries with concurrent execution
 - **OSINT Analysis Tools**: DNS propagation check, wildcard detection, response time analysis
@@ -288,7 +288,7 @@ poetry run isort .
 
 ## Future Enhancements
 
-### TODO: DNS Walking & Subdomain Discovery 🚶‍♂️
+### TODO: DNS Walking & Subdomain Discovery
 *Added during pair programming session - August 19, 2025*
 
 - [ ] **Dictionary-Based Subdomain Enumeration**: Brute force common subdomains using wordlists
