@@ -2,7 +2,7 @@
 
 A DNS reconnaissance toolkit built as an MCP server for threat intelligence and OSINT investigations. Provides DNS querying capabilities with support for multiple resolvers and concurrent operations.
 
-## 🚀 Features
+## Features
 
 ### Core DNS Tools
 - **dns_query**: Query specific DNS record types (A, AAAA, MX, TXT, NS, SOA, CNAME, CAA, SRV, PTR)
@@ -25,7 +25,7 @@ A DNS reconnaissance toolkit built as an MCP server for threat intelligence and 
 - **Centralized Configuration**: Robust parameter validation and configurable defaults
 - **Comprehensive Testing**: 90%+ test coverage with edge cases, performance benchmarks, and real-world scenarios
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python 3.10+
 - Poetry for dependency management
@@ -96,7 +96,7 @@ Add to your Claude MCP settings:
 - Note: You may need to add full paths to `poetry` and `dns-mcp-server`
 - Note: You may need to point poetry directly to your project folder file like:
   `"args": ["run","-C", "/path/to/dns-mcp-server","python", "-m", "dns_mcp_server"]`
-## 🕵️ OSINT Use Cases
+## OSINT Use Cases
 
 ### Threat Actor Infrastructure Mapping
 ```python
@@ -157,7 +157,7 @@ if wildcard_result["has_wildcard"]:
     print(f"Wildcard DNS detected - Risk level: {risk}")
 ```
 
-## 🌐 Resolver Types
+## Resolver Types
 
 - **system**: Use system default resolvers
 - **public**: Multi-resolver approach (8.8.8.8, 1.1.1.1, 9.9.9.9)
@@ -167,7 +167,7 @@ if wildcard_result["has_wildcard"]:
 - **opendns**: OpenDNS (208.67.222.222, 208.67.220.220)
 - **custom**: Specify custom nameserver IP
 
-## 📊 DNS Record Types Supported
+## DNS Record Types Supported
 
 - **A**: IPv4 addresses
 - **AAAA**: IPv6 addresses  
@@ -180,7 +180,7 @@ if wildcard_result["has_wildcard"]:
 - **SRV**: Service records
 - **PTR**: Reverse DNS records
 
-## 🔍 Example Responses
+## Example Responses
 
 ### Single Query Response
 ```json
@@ -215,11 +215,11 @@ if wildcard_result["has_wildcard"]:
 }
 ```
 
-## 🛡️ Security & Ethics
+## Security & Ethics
 
 This tool is designed for legitimate security research, threat intelligence, and OSINT investigations. Always ensure you have proper authorization before conducting reconnaissance activities.
 
-## 🚧 Development
+## Development
 
 ### Enhanced Testing Framework
 The project includes comprehensive testing with multiple categories:
@@ -278,15 +278,15 @@ poetry run isort .
 
 ## 🚀 Completed Enhancements
 
-- ✅ **Async Performance Optimization**: 5-10x faster bulk queries with concurrent execution
-- ✅ **OSINT Analysis Tools**: DNS propagation check, wildcard detection, response time analysis
-- ✅ **Enhanced Error Handling**: OSINT-aware error messages with investigation tips
-- ✅ **Centralized Configuration**: Robust parameter validation and configurable defaults
-- ✅ **Comprehensive Testing**: 90%+ test coverage with performance benchmarks
-- ✅ **Per-Resolver Rate Limiting**: Prevents DNS server abuse and blocking
-- ✅ **Professional Code Organization**: Modular architecture with proper documentation
+- **Async Performance Optimization**: 5-10x faster bulk queries with concurrent execution
+- **OSINT Analysis Tools**: DNS propagation check, wildcard detection, response time analysis
+- **Enhanced Error Handling**: OSINT-aware error messages with investigation tips
+- **Centralized Configuration**: Robust parameter validation and configurable defaults
+- **Comprehensive Testing**: 90%+ test coverage with performance benchmarks
+- **Per-Resolver Rate Limiting**: Prevents DNS server abuse and blocking
+- **Professional Code Organization**: Modular architecture with proper documentation
 
-## 📈 Future Enhancements
+## Future Enhancements
 
 ### TODO: DNS Walking & Subdomain Discovery 🚶‍♂️
 *Added during pair programming session - August 19, 2025*
@@ -321,10 +321,10 @@ poetry run isort .
 - [ ] Web dashboard interface
 - [ ] Machine learning-based anomaly detection
 
-## 📄 License
+## License
 
 This project is open source and available under the MIT License.
 
 ---
 
-**Happy OSINT hunting!** 🕵️‍♂️🔍
+**Happy OSINT hunting!**
